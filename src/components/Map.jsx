@@ -5,31 +5,27 @@ import MapMarker from "./MapMarker";
 import { fetchNews } from "../data/news";
 import { getCountryLocation, randomCountryCode } from "../utils";
 
-// fetch news data from API
-// match news data to country_codes
-// randomly select a country and point it to the map
-// display a marker with an image of the country
-// when hoovered and waited 1s pop up the news
-// when unhoovered move to the next news
-// place a button to pause movement
-
 const MapBox = () => {
-  const [randomCountry, setRandomCountry] = useState();
   const [countryCode, setCountryCode] = useState();
   const [news, setNews] = useState([]);
+  const [marker, setMarker] = useState(false);
+
   useEffect(() => {
     const fetch = async () => {
-      const res = randomCountryCode();
-      setRandomCountry(res);
-      console.log(randomCountry.alpha2.toLowerCase());
-      console.log(randomCountry);
-      const result = await fetchNews(countryCode);
-      if (result.status !== "ok") {
-        fetch();
-        console.log("no news found");
+      const randomCountry = randomCountryCode();
+      console.log("random country selected: ", randomCountry);
+      const result = await fetchNews(randomCountry.alpha2.toLowerCase());
+      if (result.status == 200) {
+        console.log("result ok and there is article");
+        console.log(result.data);
+        setNews(result.data.articles);
+        setMarker({
+          latitude: randomCountry.latitude,
+          longitude: randomCountry.longitude,
+        });
       } else {
-        setNews(result.data);
-        console.log(news);
+        console.log("fetching news again");
+        fetch();
       }
     };
     fetch();
@@ -66,6 +62,10 @@ const MapBox = () => {
           });
         }}
       >
+        {marker && (
+          <MapMarker latitude={marker.latitude} longitude={marker.longitude} />
+        )}
+
         {/* <MapMarker
           key={country.name}
           latitude={country.latitude}
