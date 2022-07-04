@@ -10,7 +10,7 @@ function App() {
   return (
     <div className="App">
       <div>
-        <Map />
+        <Map> markers here </Map>
       </div>
     </div>
   );

@@ -1,75 +1,79 @@
 import React, { useRef, useEffect, useState } from "react";
-import mapboxgl from "mapbox-gl";
-import styles from "./styles.module.css";
+import Map from "react-map-gl";
+import countryCodes from "../data/countryCodes";
+import MapMarker from "./MapMarker";
+import { fetchNews } from "../data/news";
+import { getCountryLocation, randomCountryCode } from "../utils";
 
-mapboxgl.accessToken = process.env.REACT_APP_MAPBOX_ACCESS_TOKEN;
-
-const secondsPerRevolution = 80;
-const maxSpinZoom = 5;
-const slowSpinZoom = 3;
-let userInteracting = false;
-let spinEnabled = true;
-
-function spinGlobe(map) {
-  const zoom = map.current.getZoom();
-  if (spinEnabled && !userInteracting && zoom < maxSpinZoom) {
-    let distancePerSecond = 360 / secondsPerRevolution;
-    if (zoom > slowSpinZoom) {
-      // Slow spinning at higher zooms
-      const zoomDif = (maxSpinZoom - zoom) / (maxSpinZoom - slowSpinZoom);
-      distancePerSecond *= zoomDif;
-    }
-    const center = map.current.getCenter();
-    center.lng -= distancePerSecond;
-    map.current.easeTo({ center, duration: 1000, easing: (n) => n });
-  }
-}
+// fetch news data from API
+// match news data to country_codes
+// randomly select a country and point it to the map
+// display a marker with an image of the country
+// when hoovered and waited 1s pop up the news
+// when unhoovered move to the next news
+// place a button to pause movement
 
 const MapBox = () => {
-  const mapContainer = useRef(null);
-  const map = useRef(null);
-  const [lng, setLng] = useState(34);
-  const [lat, setLat] = useState(34);
-  const [zoom, setZoom] = useState(1.6);
-
+  const [randomCountry, setRandomCountry] = useState();
+  const [countryCode, setCountryCode] = useState();
+  const [news, setNews] = useState([]);
   useEffect(() => {
-    if (map.current) return;
-    map.current = new mapboxgl.Map({
-      container: mapContainer.current,
-      projection: "globe",
-      style: "mapbox://styles/mapbox/satellite-streets-v11",
-      center: [lng, lat],
-      zoom: zoom,
-      layer: "none",
-    });
-    map.current.on("mousedown", () => {
-      userInteracting = true;
-    });
-    map.current.on("mouseup", () => {
-      userInteracting = false;
-      spinGlobe(map);
-    });
-    map.current.on("dragend", () => {
-      userInteracting = false;
-      spinGlobe(map);
-    });
-    map.current.on("pitchend", () => {
-      userInteracting = false;
-      spinGlobe(map);
-    });
-    map.current.on("rotateend", () => {
-      userInteracting = false;
-      spinGlobe(map);
-    });
+    const fetch = async () => {
+      const res = randomCountryCode();
+      setRandomCountry(res);
+      console.log(randomCountry.alpha2.toLowerCase());
+      console.log(randomCountry);
+      const result = await fetchNews(countryCode);
+      if (result.status !== "ok") {
+        fetch();
+        console.log("no news found");
+      } else {
+        setNews(result.data);
+        console.log(news);
+      }
+    };
+    fetch();
+  }, []);
 
-    map.current.on("moveend", () => {
-      spinGlobe(map);
-    });
+  const [mapOptions, setMapOptions] = useState({
+    initialViewState: {
+      latitude: 36,
+      longitude: 42,
+      zoom: 1.6,
+    },
+    style: {
+      width: "100vw",
+      height: "100vh",
+    },
+    mapStyle: "mapbox://styles/mapbox/streets-v11",
   });
-
   return (
     <>
-      <div ref={mapContainer} className={styles.mapContainer} />
+      <Map
+        mapboxAccessToken={process.env.REACT_APP_MAPBOX_ACCESS_TOKEN}
+        initialViewState={mapOptions.initialViewState}
+        style={mapOptions.style}
+        projection={mapOptions.projection}
+        attributionControl={false}
+        mapStyle={mapOptions.mapStyle}
+        onViewPortChange={(viewport) => {
+          setMapOptions({
+            ...mapOptions,
+            initialViewState: {
+              ...mapOptions.initialViewState,
+              ...viewport,
+            },
+          });
+        }}
+      >
+        {/* <MapMarker
+          key={country.name}
+          latitude={country.latitude}
+          longitude={country.longitude}
+          name={country.name}
+          countryCode={country.country_code}
+        /> */}
+      </Map>
     </>
   );
 };
