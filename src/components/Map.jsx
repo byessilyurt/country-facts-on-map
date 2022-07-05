@@ -1,14 +1,14 @@
 import React, { useRef, useEffect, useState } from "react";
 import Map from "react-map-gl";
-import countryCodes from "../data/countryCodes";
 import MapMarker from "./MapMarker";
 import { fetchNews } from "../data/news";
-import { getCountryLocation, randomCountryCode } from "../utils";
+import { randomCountryCode } from "../utils";
+import Button from "./Button";
 
 const MapBox = () => {
-  const [countryCode, setCountryCode] = useState();
   const [news, setNews] = useState([]);
   const [marker, setMarker] = useState(false);
+  const [isActive, setIsActive] = useState(false);
 
   useEffect(() => {
     const fetch = async () => {
@@ -25,11 +25,15 @@ const MapBox = () => {
         });
       } else {
         console.log("fetching news again");
+
         fetch();
       }
     };
-    fetch();
-  }, []);
+    if (isActive) {
+      fetch();
+    }
+    console.log(isActive, "isActive");
+  }, [isActive]);
 
   const [mapOptions, setMapOptions] = useState({
     initialViewState: {
@@ -45,6 +49,7 @@ const MapBox = () => {
   });
   return (
     <>
+      <Button isActive={isActive} setIsActive={setIsActive} />
       <Map
         mapboxAccessToken={process.env.REACT_APP_MAPBOX_ACCESS_TOKEN}
         initialViewState={mapOptions.initialViewState}
