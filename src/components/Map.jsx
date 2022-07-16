@@ -4,37 +4,26 @@ import MapMarker from "./MapMarker";
 import { fetchNews } from "../data/news";
 import { randomCountryCode } from "../utils";
 import Button from "./Button";
+import { useFetchNews } from "../hooks/fetchNews";
 
 const MapBox = () => {
   const [news, setNews] = useState([]);
   const [marker, setMarker] = useState(false);
-  const [isActive, setIsActive] = useState(false);
-
-  useEffect(() => {
-    const fetch = async () => {
-      const randomCountry = randomCountryCode();
-      console.log("random country selected: ", randomCountry);
-      const result = await fetchNews(randomCountry.alpha2.toLowerCase());
-      if (result.status == 200) {
-        console.log("result ok and there is article");
-        console.log(result.data);
-        setNews(result.data.articles);
-        setMarker({
-          latitude: randomCountry.latitude,
-          longitude: randomCountry.longitude,
-        });
-      } else {
-        console.log("fetching news again");
-
-        fetch();
-      }
-    };
-    if (isActive) {
-      fetch();
-    }
-    console.log(isActive, "isActive");
-  }, [isActive]);
-
+  const [isActive, setIsActive] = useState(true);
+  const [prevCountries, setPrevCountries] = useState([]);
+  const [previous, setPrevious] = useState(false);
+  const fetch = useFetchNews(
+    news,
+    setNews,
+    marker,
+    setMarker,
+    isActive,
+    setIsActive,
+    prevCountries,
+    setPrevCountries,
+    previous,
+    setPrevious
+  );
   const [mapOptions, setMapOptions] = useState({
     initialViewState: {
       latitude: 36,
@@ -49,7 +38,12 @@ const MapBox = () => {
   });
   return (
     <>
-      <Button isActive={isActive} setIsActive={setIsActive} />
+      <Button
+        isActive={isActive}
+        setIsActive={setIsActive}
+        setPrevious={setPrevious}
+        prevCountries={prevCountries}
+      />
       <Map
         mapboxAccessToken={process.env.REACT_APP_MAPBOX_ACCESS_TOKEN}
         initialViewState={mapOptions.initialViewState}
@@ -70,14 +64,6 @@ const MapBox = () => {
         {marker && (
           <MapMarker latitude={marker.latitude} longitude={marker.longitude} />
         )}
-
-        {/* <MapMarker
-          key={country.name}
-          latitude={country.latitude}
-          longitude={country.longitude}
-          name={country.name}
-          countryCode={country.country_code}
-        /> */}
       </Map>
     </>
   );
