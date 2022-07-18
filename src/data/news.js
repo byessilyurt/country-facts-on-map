@@ -1,9 +1,14 @@
 import axios from "axios";
 
 export const fetchNews = async (countryCode) => {
+  const API_KEY = process.env.REACT_APP_NEWS_API_KEY;
+  const API_URL = process.env.REACT_APP_NEWS_API_URL;
+  console.log(API_KEY);
+  const url = `${API_URL}?country=${countryCode}&language=en&apiKey=${API_KEY}`;
+  console.log("API URL", url);
   const options = {
     method: "GET",
-    url: `https://newsapi.org/v2/top-headlines?country=${countryCode}&apiKey=e5a771bbd4e84b6b8294b3d968a74555`,
+    url: url,
   };
 
   const response = await axios.request(options);

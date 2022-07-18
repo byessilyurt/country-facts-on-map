@@ -12,18 +12,8 @@ const MapBox = () => {
   const [isActive, setIsActive] = useState(true);
   const [prevCountries, setPrevCountries] = useState([]);
   const [previous, setPrevious] = useState(false);
-  const fetch = useFetchNews(
-    news,
-    setNews,
-    marker,
-    setMarker,
-    isActive,
-    setIsActive,
-    prevCountries,
-    setPrevCountries,
-    previous,
-    setPrevious
-  );
+  const [center, setCenter] = useState([36, 42]);
+
   const [mapOptions, setMapOptions] = useState({
     initialViewState: {
       latitude: 36,
@@ -34,9 +24,38 @@ const MapBox = () => {
       width: "100vw",
       height: "100vh",
     },
-    mapStyle: "mapbox://styles/mapbox/streets-v11",
+    mapStyle: "mapbox://styles/byessilyurt/cl5r6psud000015pgqokz266x",
+    projection: "globe",
   });
+
+  const fetch = useFetchNews(
+    news,
+    setNews,
+    marker,
+    setMarker,
+    isActive,
+    setIsActive,
+    prevCountries,
+    setPrevCountries,
+    previous,
+    setPrevious,
+    center,
+    setCenter
+  );
+
+  // useEffect(() => {
+  //   Map.jumpTo({
+  //     center: center,
+  //     zoom: 4,
+  //     pitch: 45,
+  //     bearing: 90,
+  //   });
+  // }, [center]);
+
   return (
+    /// TODO
+    /// 1. Add a button to change to select in which languages they want to read news
+
     <>
       <Button
         isActive={isActive}
@@ -49,7 +68,6 @@ const MapBox = () => {
         initialViewState={mapOptions.initialViewState}
         style={mapOptions.style}
         projection={mapOptions.projection}
-        attributionControl={false}
         mapStyle={mapOptions.mapStyle}
         onViewPortChange={(viewport) => {
           setMapOptions({
@@ -62,7 +80,11 @@ const MapBox = () => {
         }}
       >
         {marker && (
-          <MapMarker latitude={marker.latitude} longitude={marker.longitude} />
+          <MapMarker
+            latitude={marker.latitude}
+            longitude={marker.longitude}
+            setMapOptions={setMapOptions}
+          />
         )}
       </Map>
     </>

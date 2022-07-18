@@ -7,10 +7,10 @@ function Button({ isActive, setIsActive, setPrevious, prevCountries }) {
 
   const disabled = !prevCountries.length === 0;
 
-  const handlePrevious = () => {
-    setPrevious(true);
-    setIsActive(true);
-  };
+  // const handlePrevious = () => {
+  //   setPrevious(true);
+  //   setIsActive(true);
+  // };
 
   const handleNext = () => {
     setIsActive(true);
@@ -19,11 +19,17 @@ function Button({ isActive, setIsActive, setPrevious, prevCountries }) {
 
   return (
     <div className="absolute top-0 flex z-10 mx-auto w-full justify-center ">
-      <div className="text-red-400 bg-blue-100 w-80 flex justify-between">
-        <button onClick={handlePrevious} disabled={disabled}>
+      <div className=" w-80 flex justify-center bg-gray-100 rounded">
+        {/* <button
+          onClick={handlePrevious}
+          disabled={true}
+          className="line-through"
+        >
           Previous
+        </button> */}
+        <button onClick={handleNext} className="tracking-wider">
+          Next Country
         </button>
-        <button onClick={handleNext}>Next</button>
       </div>
     </div>
   );

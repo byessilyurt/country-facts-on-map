@@ -12,35 +12,48 @@ export const useFetchNews = (
   setPrevCountries,
   previous,
   setPrevious,
-  previousCounter,
-  setPreviousCounter
+  center,
+  setCenter
 ) => {
   const fetch = async () => {
     let countryToFetchNews;
-    if (previous) {
-      countryToFetchNews = prevCountries[prevCountries.length - 1];
-      prevCountries.pop();
-    } else {
-      countryToFetchNews = randomCountryCode();
-    }
-    console.log("random country selected: ", countryToFetchNews);
-    const result = await fetchNews(countryToFetchNews.alpha2.toLowerCase());
-    if (result.status == 200) {
+    // if (previous) {
+    //   countryToFetchNews = prevCountries[prevCountries.length - 1 - 1]; // last index is the current country
+    //   prevCountries.pop();
+    //   console.log("PREVIOUS: ", countryToFetchNews);
+    // } else {
+    //   countryToFetchNews = randomCountryCode();
+    //   console.log("RANDOM COUNTRY: ", countryToFetchNews);
+    // }
+    // // if there is news on localstorage then fetch it
+    // if (localStorage.getItem(countryToFetchNews)) {
+    //   setNews(JSON.parse(localStorage.getItem(countryToFetchNews)));
+    // }
+    // // if there is no news on localstorage then fetch it
+    // else {
+    countryToFetchNews = randomCountryCode();
+    //  const result = await fetchNews(countryToFetchNews.alpha2.toLowerCase());
+    //if (result.status == 200 && result.data.articles.length > 0) {
+    if (true) {
       console.log("result ok and there are articles");
-      console.log(result.data);
-      setNews(result.data.articles);
+      //setNews(result.data.articles);
+      //console.log(result.data);
       setMarker({
         latitude: countryToFetchNews.latitude,
         longitude: countryToFetchNews.longitude,
       });
       setIsActive(false);
-      setPrevCountries((prevCountries) => [
-        ...prevCountries,
-        {
-          name: countryToFetchNews.country,
-          alpha2: countryToFetchNews.alpha2,
-        },
-      ]);
+      setCenter([countryToFetchNews.latitude, countryToFetchNews.longitude]);
+
+      // setPrevCountries((prevCountries) => [
+      //   ...prevCountries,
+      //   {
+      //     name: countryToFetchNews.country,
+      //     alpha2: countryToFetchNews.alpha2,
+      //     latitude: countryToFetchNews.latitude,
+      //     longitude: countryToFetchNews.longitude,
+      //   },
+      // ]);
     } else {
       console.log("fetching news again");
       fetch();
