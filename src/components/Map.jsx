@@ -1,5 +1,12 @@
 import React, { useRef, useEffect, useState } from "react";
-import Map from "react-map-gl";
+import Map, {
+  FullscreenControl,
+  NavigationControl,
+  GeolocateControl,
+  ScaleControl,
+  Popup,
+  useMap,
+} from "react-map-gl";
 import MapMarker from "./MapMarker";
 import { fetchNews } from "../data/news";
 import { randomCountryCode } from "../utils";
@@ -12,14 +19,20 @@ const MapBox = () => {
   const [isActive, setIsActive] = useState(true);
   const [prevCountries, setPrevCountries] = useState([]);
   const [previous, setPrevious] = useState(false);
-  const [center, setCenter] = useState([36, 42]);
+  const [center, setCenter] = useState({
+    latitude: 40,
+    longitude: 40,
+    zoom: 1,
+  });
+  const [showPopup, setShowPopup] = useState(true);
+  const { current: map } = useMap();
+
+  useEffect(() => {
+    console.log(map);
+  }, []);
 
   const [mapOptions, setMapOptions] = useState({
-    initialViewState: {
-      latitude: 36,
-      longitude: 42,
-      zoom: 1.6,
-    },
+    initialViewState: center,
     style: {
       width: "100vw",
       height: "100vh",
@@ -44,12 +57,8 @@ const MapBox = () => {
   );
 
   // useEffect(() => {
-  //   Map.jumpTo({
-  //     center: center,
-  //     zoom: 4,
-  //     pitch: 45,
-  //     bearing: 90,
-  //   });
+  //   console.log("flying to ", center);
+  //   Map.flyTo(center, 1200);
   // }, [center]);
 
   return (
@@ -65,11 +74,15 @@ const MapBox = () => {
       />
       <Map
         mapboxAccessToken={process.env.REACT_APP_MAPBOX_ACCESS_TOKEN}
-        initialViewState={mapOptions.initialViewState}
+        onLoad={(e) => {
+          console.log(e.target);
+        }}
+        viewState={center}
         style={mapOptions.style}
         projection={mapOptions.projection}
         mapStyle={mapOptions.mapStyle}
         onViewPortChange={(viewport) => {
+          console.log("viewport", viewport);
           setMapOptions({
             ...mapOptions,
             initialViewState: {
@@ -79,12 +92,31 @@ const MapBox = () => {
           });
         }}
       >
+        <FullscreenControl />
+        <NavigationControl />
+        <GeolocateControl />
+        <ScaleControl />
+
         {marker && (
           <MapMarker
+            onClick={() => {
+              setShowPopup(true);
+            }}
             latitude={marker.latitude}
             longitude={marker.longitude}
             setMapOptions={setMapOptions}
           />
+        )}
+        {showPopup && (
+          <Popup
+            longitude={marker.longitude}
+            latitude={marker.latitude}
+            anchor="center"
+            onClose={() => setShowPopup(false)}
+          >
+            {console.log(news)}
+            {news}
+          </Popup>
         )}
       </Map>
     </>

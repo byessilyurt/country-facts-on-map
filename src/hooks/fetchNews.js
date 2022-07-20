@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { randomCountryCode } from "../utils";
 import { fetchNews } from "../data/news";
 export const useFetchNews = (
@@ -15,7 +15,7 @@ export const useFetchNews = (
   center,
   setCenter
 ) => {
-  const fetch = async () => {
+  const fetch = useCallback(async () => {
     let countryToFetchNews;
     // if (previous) {
     //   countryToFetchNews = prevCountries[prevCountries.length - 1 - 1]; // last index is the current country
@@ -32,18 +32,21 @@ export const useFetchNews = (
     // // if there is no news on localstorage then fetch it
     // else {
     countryToFetchNews = randomCountryCode();
-    //  const result = await fetchNews(countryToFetchNews.alpha2.toLowerCase());
-    //if (result.status == 200 && result.data.articles.length > 0) {
-    if (true) {
+    const result = await fetchNews(countryToFetchNews.alpha2.toLowerCase());
+    if (result.status === 200 && result.data.articles.length > 0) {
       console.log("result ok and there are articles");
-      //setNews(result.data.articles);
-      //console.log(result.data);
+      setNews(result.data.articles);
+      console.log(result.data);
       setMarker({
         latitude: countryToFetchNews.latitude,
         longitude: countryToFetchNews.longitude,
       });
       setIsActive(false);
-      setCenter([countryToFetchNews.latitude, countryToFetchNews.longitude]);
+      setCenter({
+        latitude: countryToFetchNews.latitude,
+        longitude: countryToFetchNews.longitude,
+        zoom: 2,
+      });
 
       // setPrevCountries((prevCountries) => [
       //   ...prevCountries,
@@ -58,7 +61,7 @@ export const useFetchNews = (
       console.log("fetching news again");
       fetch();
     }
-  };
+  }, [setNews, setMarker, setIsActive, setCenter]);
 
   useEffect(() => {
     if (isActive) {
@@ -66,5 +69,5 @@ export const useFetchNews = (
     } else {
       console.log("not active");
     }
-  }, [isActive]);
+  }, [isActive, fetch]);
 };
