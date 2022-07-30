@@ -1,35 +1,19 @@
-import React, { useRef, useEffect, useState } from "react";
+import React, { useEffect, useState, useRef, useCallback } from "react";
 import Map, {
   FullscreenControl,
   NavigationControl,
   GeolocateControl,
   ScaleControl,
   Popup,
-  useMap,
 } from "react-map-gl";
 import MapMarker from "./MapMarker";
-import { fetchNews } from "../data/news";
-import { randomCountryCode } from "../utils";
 import Button from "./Button";
 import { useFetchNews } from "../hooks/fetchNews";
 
 const MapBox = () => {
-  const [news, setNews] = useState([]);
-  const [marker, setMarker] = useState(false);
-  const [isActive, setIsActive] = useState(true);
-  const [prevCountries, setPrevCountries] = useState([]);
-  const [previous, setPrevious] = useState(false);
-  const [center, setCenter] = useState({
-    latitude: 40,
-    longitude: 40,
-    zoom: 1,
-  });
-  const [showPopup, setShowPopup] = useState(true);
-  const { current: map } = useMap();
-
-  useEffect(() => {
-    console.log(map);
-  }, []);
+  const [showPopup, setShowPopup] = useState(false);
+  const { marker, news, center, isActive, setIsActive } = useFetchNews();
+  const mapRef = useRef();
 
   const [mapOptions, setMapOptions] = useState({
     initialViewState: center,
@@ -41,48 +25,42 @@ const MapBox = () => {
     projection: "globe",
   });
 
-  const fetch = useFetchNews(
-    news,
-    setNews,
-    marker,
-    setMarker,
-    isActive,
-    setIsActive,
-    prevCountries,
-    setPrevCountries,
-    previous,
-    setPrevious,
-    center,
-    setCenter
+  useEffect(() => {
+    console.log(center);
+  }, [center]);
+
+  const onSelectCity = useCallback(({ longitude, latitude }) => {
+    mapRef.current?.flyTo({ center: [longitude, latitude], duration: 2000 });
+  }, []);
+
+  const mapOnLoad = useCallback(
+    (e) => {
+      console.log("flyto: ", e.target.flyTo);
+      e.target.flyTo({
+        center,
+        zoom: 2,
+        speed: 0.3,
+        curve: 1,
+        easing(t) {
+          return t;
+        },
+      });
+    },
+    [center]
   );
 
-  // useEffect(() => {
-  //   console.log("flying to ", center);
-  //   Map.flyTo(center, 1200);
-  // }, [center]);
-
   return (
-    /// TODO
-    /// 1. Add a button to change to select in which languages they want to read news
-
     <>
-      <Button
-        isActive={isActive}
-        setIsActive={setIsActive}
-        setPrevious={setPrevious}
-        prevCountries={prevCountries}
-      />
+      <Button isActive={isActive} setIsActive={setIsActive} />
       <Map
+        ref={mapRef}
         mapboxAccessToken={process.env.REACT_APP_MAPBOX_ACCESS_TOKEN}
-        onLoad={(e) => {
-          console.log(e.target);
-        }}
-        viewState={center}
+        onLoad={(e) => mapOnLoad(e)}
+        initialViewState={center}
         style={mapOptions.style}
         projection={mapOptions.projection}
         mapStyle={mapOptions.mapStyle}
         onViewPortChange={(viewport) => {
-          console.log("viewport", viewport);
           setMapOptions({
             ...mapOptions,
             initialViewState: {
@@ -114,7 +92,6 @@ const MapBox = () => {
             anchor="center"
             onClose={() => setShowPopup(false)}
           >
-            {console.log(news)}
             {news}
           </Popup>
         )}

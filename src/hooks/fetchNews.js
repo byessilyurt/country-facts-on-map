@@ -1,36 +1,14 @@
 import { useEffect, useState, useCallback } from "react";
 import { randomCountryCode } from "../utils";
 import { fetchNews } from "../data/news";
-export const useFetchNews = (
-  news,
-  setNews,
-  marker,
-  setMarker,
-  isActive,
-  setIsActive,
-  prevCountries,
-  setPrevCountries,
-  previous,
-  setPrevious,
-  center,
-  setCenter
-) => {
+export const useFetchNews = () => {
+  const [news, setNews] = useState([]);
+  const [marker, setMarker] = useState(false);
+  const [isActive, setIsActive] = useState(true);
+  const [center, setCenter] = useState([]);
+
   const fetch = useCallback(async () => {
     let countryToFetchNews;
-    // if (previous) {
-    //   countryToFetchNews = prevCountries[prevCountries.length - 1 - 1]; // last index is the current country
-    //   prevCountries.pop();
-    //   console.log("PREVIOUS: ", countryToFetchNews);
-    // } else {
-    //   countryToFetchNews = randomCountryCode();
-    //   console.log("RANDOM COUNTRY: ", countryToFetchNews);
-    // }
-    // // if there is news on localstorage then fetch it
-    // if (localStorage.getItem(countryToFetchNews)) {
-    //   setNews(JSON.parse(localStorage.getItem(countryToFetchNews)));
-    // }
-    // // if there is no news on localstorage then fetch it
-    // else {
     countryToFetchNews = randomCountryCode();
     const result = await fetchNews(countryToFetchNews.alpha2.toLowerCase());
     if (result.status === 200 && result.data.articles.length > 0) {
@@ -42,21 +20,7 @@ export const useFetchNews = (
         longitude: countryToFetchNews.longitude,
       });
       setIsActive(false);
-      setCenter({
-        latitude: countryToFetchNews.latitude,
-        longitude: countryToFetchNews.longitude,
-        zoom: 2,
-      });
-
-      // setPrevCountries((prevCountries) => [
-      //   ...prevCountries,
-      //   {
-      //     name: countryToFetchNews.country,
-      //     alpha2: countryToFetchNews.alpha2,
-      //     latitude: countryToFetchNews.latitude,
-      //     longitude: countryToFetchNews.longitude,
-      //   },
-      // ]);
+      setCenter([countryToFetchNews.latitude, countryToFetchNews.longitude]);
     } else {
       console.log("fetching news again");
       fetch();
@@ -70,4 +34,6 @@ export const useFetchNews = (
       console.log("not active");
     }
   }, [isActive, fetch]);
+
+  return { news, marker, isActive, setIsActive, center };
 };
