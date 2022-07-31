@@ -12,9 +12,14 @@ import { useFetchNews } from "../hooks/fetchNews";
 
 const MapBox = () => {
   const [showPopup, setShowPopup] = useState(false);
-  const { marker, news, center, isActive, setIsActive } = useFetchNews();
   const mapRef = useRef();
-
+  const { marker, news, center, isActive, setIsActive } = useFetchNews();
+  const onCountryChange = useCallback(
+    ({ longitude, latitude }) => {
+      mapRef.current?.flyTo({ center: [longitude, latitude], duration: 2000 });
+    },
+    [center]
+  );
   const [mapOptions, setMapOptions] = useState({
     initialViewState: center,
     style: {
@@ -27,11 +32,8 @@ const MapBox = () => {
 
   useEffect(() => {
     console.log(center);
+    onCountryChange({ longitude: center[1], latitude: center[0] });
   }, [center]);
-
-  const onSelectCity = useCallback(({ longitude, latitude }) => {
-    mapRef.current?.flyTo({ center: [longitude, latitude], duration: 2000 });
-  }, []);
 
   const mapOnLoad = useCallback(
     (e) => {

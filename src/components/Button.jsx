@@ -2,7 +2,6 @@ import React from "react";
 
 function Button({ setIsActive }) {
   const handleNext = () => {
-    console.log(setIsActive);
     setIsActive(true);
   };
 
