@@ -18,6 +18,7 @@ export const useFetchNews = () => {
       setMarker({
         latitude: countryToFetchNews.latitude,
         longitude: countryToFetchNews.longitude,
+        country: countryToFetchNews.country,
       });
       setIsActive(false);
       setCenter([countryToFetchNews.latitude, countryToFetchNews.longitude]);

@@ -14,12 +14,17 @@ const MapBox = () => {
   const [showPopup, setShowPopup] = useState(false);
   const mapRef = useRef();
   const { marker, news, center, isActive, setIsActive } = useFetchNews();
-  const onCountryChange = useCallback(
-    ({ longitude, latitude }) => {
-      mapRef.current?.flyTo({ center: [longitude, latitude], duration: 2000 });
-    },
-    [center]
-  );
+  const onCountryChange = useCallback(({ longitude, latitude }) => {
+    mapRef.current?.flyTo({
+      center: [longitude, latitude],
+      zoom: 2.4,
+      speed: 0.1,
+      curve: 1,
+      easing(t) {
+        return t;
+      },
+    });
+  }, []);
   const [mapOptions, setMapOptions] = useState({
     initialViewState: center,
     style: {
@@ -31,9 +36,8 @@ const MapBox = () => {
   });
 
   useEffect(() => {
-    console.log(center);
     onCountryChange({ longitude: center[1], latitude: center[0] });
-  }, [center]);
+  }, [center, onCountryChange]);
 
   const mapOnLoad = useCallback(
     (e) => {
@@ -73,28 +77,29 @@ const MapBox = () => {
         }}
       >
         <FullscreenControl />
-        <NavigationControl />
-        <GeolocateControl />
-        <ScaleControl />
 
         {marker && (
           <MapMarker
             onClick={() => {
               setShowPopup(true);
             }}
-            latitude={marker.latitude}
-            longitude={marker.longitude}
+            latitude={center[0]}
+            longitude={center[1]}
             setMapOptions={setMapOptions}
-          />
+          >
+            <div className="text-red-300 bg-white px-4 py-2 flex items-center">
+              {marker.country}
+            </div>
+          </MapMarker>
         )}
         {showPopup && (
           <Popup
-            longitude={marker.longitude}
-            latitude={marker.latitude}
+            latitude={center[0]}
+            longitude={center[1]}
             anchor="center"
             onClose={() => setShowPopup(false)}
           >
-            {news}
+            {news.toLocaleString()}
           </Popup>
         )}
       </Map>
