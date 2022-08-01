@@ -33,7 +33,12 @@ const MapBox = () => {
 
   useEffect(() => {
     onCountryChange({ longitude: center[1], latitude: center[0] });
+    console.log("center: ", center[0]);
   }, [center, onCountryChange]);
+
+  useEffect(() => {
+    console.log(showPopup);
+  }, [showPopup]);
 
   const mapOnLoad = useCallback(
     (e) => {
@@ -74,28 +79,19 @@ const MapBox = () => {
       >
         {marker && (
           <MapMarker
-            onClick={() => {
-              setShowPopup(true);
-            }}
+            setShowPopup={setShowPopup}
             latitude={center[0]}
             longitude={center[1]}
             setMapOptions={setMapOptions}
           >
-            <div className="text-red-300 bg-white px-4 py-2 flex items-center">
-              {marker.country}
-            </div>
+            {marker.country}
           </MapMarker>
         )}
-        {showPopup && (
-          <Popup
-            latitude={center[0]}
-            longitude={center[1]}
-            anchor="center"
-            onClose={() => setShowPopup(false)}
-          >
-            {JSON.stringify(news)}
+        {showPopup && center[0] ? (
+          <Popup latitude={center[0]} longitude={center[1]} anchor="center">
+            You are here
           </Popup>
-        )}
+        ) : null}
       </Map>
     </>
   );

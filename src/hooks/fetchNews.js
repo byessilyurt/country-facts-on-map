@@ -11,7 +11,12 @@ export const useFetchNews = () => {
     let countryToFetchNews;
     countryToFetchNews = randomCountryCode();
     const result = await fetchNews(countryToFetchNews.alpha2.toLowerCase());
-    if (true) {
+    if (
+      !(countryToFetchNews.longitude < -90) ||
+      !(countryToFetchNews.longitude > 90) ||
+      !(countryToFetchNews.latitude < -90) ||
+      !(countryToFetchNews.latitude > 90)
+    ) {
       console.log("result ok and there are articles");
       setNews(result.data);
       console.log(result.data);
