@@ -1,11 +1,5 @@
 import React, { useEffect, useState, useRef, useCallback } from "react";
-import Map, {
-  FullscreenControl,
-  NavigationControl,
-  GeolocateControl,
-  ScaleControl,
-  Popup,
-} from "react-map-gl";
+import Map, { Popup } from "react-map-gl";
 import MapMarker from "./MapMarker";
 import Button from "./Button";
 import { useFetchNews } from "../hooks/fetchNews";
@@ -15,11 +9,13 @@ const MapBox = () => {
   const mapRef = useRef();
   const { marker, news, center, isActive, setIsActive } = useFetchNews();
   const onCountryChange = useCallback(({ longitude, latitude }) => {
+    console.log("lon:", longitude);
+    console.log("lat:", latitude);
     mapRef.current?.flyTo({
       center: [longitude, latitude],
       zoom: 2.4,
-      speed: 0.1,
-      curve: 1,
+      speed: 0.2,
+      curve: 1.3,
       easing(t) {
         return t;
       },
@@ -76,8 +72,6 @@ const MapBox = () => {
           });
         }}
       >
-        <FullscreenControl />
-
         {marker && (
           <MapMarker
             onClick={() => {
@@ -99,7 +93,7 @@ const MapBox = () => {
             anchor="center"
             onClose={() => setShowPopup(false)}
           >
-            {news.toLocaleString()}
+            {JSON.stringify(news)}
           </Popup>
         )}
       </Map>
