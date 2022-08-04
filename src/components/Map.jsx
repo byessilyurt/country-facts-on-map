@@ -3,7 +3,7 @@ import Map, { Popup } from "react-map-gl";
 import MapMarker from "./MapMarker";
 import Button from "./Button";
 import { useFetchNews } from "../hooks/fetchNews";
-
+import MapPopup from "./MapPopup";
 const MapBox = () => {
   const [showPopup, setShowPopup] = useState(false);
   const mapRef = useRef();
@@ -42,16 +42,20 @@ const MapBox = () => {
 
   const mapOnLoad = useCallback(
     (e) => {
-      console.log("flyto: ", e.target.flyTo);
-      e.target.flyTo({
-        center,
-        zoom: 2,
-        speed: 0.3,
-        curve: 1,
-        easing(t) {
-          return t;
-        },
-      });
+      try {
+        console.log("flyto: ", e.target.flyTo);
+        e.target.flyTo({
+          center,
+          zoom: 2,
+          speed: 0.3,
+          curve: 1,
+          easing(t) {
+            return t;
+          },
+        });
+      } catch {
+        console.error("ERROR!: ", center);
+      }
     },
     [center]
   );
@@ -79,7 +83,7 @@ const MapBox = () => {
       >
         {marker && (
           <MapMarker
-            setShowPopup={setShowPopup}
+            onClick={() => setShowPopup(true)}
             latitude={center[0]}
             longitude={center[1]}
             setMapOptions={setMapOptions}
@@ -87,11 +91,15 @@ const MapBox = () => {
             {marker.country}
           </MapMarker>
         )}
-        {showPopup && center[0] ? (
-          <Popup latitude={center[0]} longitude={center[1]} anchor="center">
-            You are here
-          </Popup>
-        ) : null}
+        {showPopup && (
+          <MapPopup
+            latitude={center[0]}
+            longitude={center[1]}
+            setShowPopup={setShowPopup}
+          >
+            "You are here""
+          </MapPopup>
+        )}
       </Map>
     </>
   );

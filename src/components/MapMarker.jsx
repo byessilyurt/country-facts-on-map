@@ -5,11 +5,9 @@ const MapMarker = ({
   longitude,
   children,
   setMapOptions,
-  setShowPopup,
   ...props
 }) => {
   const clickHandler = () => {
-    setShowPopup(true);
     console.log("clicked");
   };
   const hooverHandle = () => {
@@ -17,19 +15,19 @@ const MapMarker = ({
   };
 
   return (
-    <div>
-      <Marker
+    <Marker
+      onMouseEnter={hooverHandle}
+      latitude={latitude}
+      longitude={longitude}
+      {...props}
+    >
+      <span
         onClick={clickHandler}
-        onMouseEnter={hooverHandle}
-        latitude={latitude}
-        longitude={longitude}
-        {...props}
+        className="hover:cursor-pointer text-[#1c2839] tracking-wider bg-[#d2e0e7] rounded-xl px-4 flex items-center"
       >
-        <div className="hover:cursor-pointer text-[#1c2839] tracking-wider bg-[#d2e0e7] rounded-xl px-4 flex items-center">
-          {children}
-        </div>
-      </Marker>
-    </div>
+        {children}
+      </span>
+    </Marker>
   );
 };
 
