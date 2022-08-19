@@ -1,6 +1,7 @@
 import { useEffect, useState, useCallback } from "react";
 import { randomCountryCode } from "../utils";
 import { fetchNews } from "../data/news";
+
 export const useFetchNews = () => {
   const [news, setNews] = useState([]);
   const [marker, setMarker] = useState(false);
@@ -11,15 +12,14 @@ export const useFetchNews = () => {
     let countryToFetchNews;
     countryToFetchNews = randomCountryCode();
     const result = await fetchNews(countryToFetchNews.alpha2.toLowerCase());
+
     if (
       !(countryToFetchNews.longitude < -90) ||
       !(countryToFetchNews.longitude > 90) ||
       !(countryToFetchNews.latitude < -90) ||
       !(countryToFetchNews.latitude > 90)
     ) {
-      console.log("result ok and there are articles");
       setNews(result.data);
-      console.log(result.data);
       setMarker({
         latitude: countryToFetchNews.latitude,
         longitude: countryToFetchNews.longitude,
@@ -28,7 +28,6 @@ export const useFetchNews = () => {
       setIsActive(false);
       setCenter([countryToFetchNews.latitude, countryToFetchNews.longitude]);
     } else {
-      console.log("fetching news again");
       fetch();
     }
   }, [setNews, setMarker, setIsActive, setCenter]);
@@ -36,8 +35,6 @@ export const useFetchNews = () => {
   useEffect(() => {
     if (isActive) {
       fetch();
-    } else {
-      console.log("not active");
     }
   }, [isActive, fetch]);
 

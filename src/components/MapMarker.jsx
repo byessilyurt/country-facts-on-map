@@ -8,10 +8,10 @@ const MapMarker = ({
   ...props
 }) => {
   const clickHandler = () => {
-    console.log("clicked");
+    //TODO
   };
   const hooverHandle = () => {
-    console.log("hooverHandler");
+    //TODO: show popup
   };
 
   return (

@@ -1,64 +1,95 @@
 import React, { useEffect, useState, useRef, useCallback } from "react";
-import Map, { Popup } from "react-map-gl";
+import Map from "react-map-gl";
+import { useFetchNews } from "../hooks/fetchNews";
+
 import MapMarker from "./MapMarker";
 import Button from "./Button";
-import { useFetchNews } from "../hooks/fetchNews";
 import MapPopup from "./MapPopup";
+
+const ZOOM = 2;
+const SPEED = 0.3;
+const CURVE = 1;
+const MAP_WIDTH = "100vw";
+const MAP_HEIGHT = "100vh";
+const MAP_STYLE = "mapbox://styles/byessilyurt/cl5r6psud000015pgqokz266x";
+const MAP_PROJECTION = "globe";
+
+const MAP_OPTIONS = {
+  initialViewState: center,
+  style: {
+    width: MAP_WIDTH,
+    height: MAP_HEIGHT,
+  },
+  mapStyle: MAP_STYLE,
+  projection: MAP_PROJECTION,
+};
+
+const flyToNextCountry = () => {
+  return {
+    center,
+    zoom: ZOOM,
+    speed: SPEED,
+    curve: CURVE,
+    easing(t) {
+      return t;
+    },
+  };
+};
+
+const mapBoxPopup = () => {
+  return (
+    <MapPopup
+      latitude={center[0]}
+      longitude={center[1]}
+      setShowPopup={setShowPopup}
+    />
+  );
+};
+
+const mapBoxMarker = () => {
+  return (
+    <MapMarker
+      onClick={() => setShowPopup(true)}
+      latitude={center[0]}
+      longitude={center[1]}
+      setMapOptions={setMapOptions}
+    >
+      {marker.country}
+    </MapMarker>
+  );
+};
+
+const mapOnLoad = useCallback(
+  (e) => {
+    try {
+      e.target.flyTo(flyToNextCountry(center));
+    } catch {}
+  },
+  [center]
+);
+
 const MapBox = () => {
   const [showPopup, setShowPopup] = useState(false);
   const mapRef = useRef();
   const { marker, news, center, isActive, setIsActive } = useFetchNews();
-  const onCountryChange = useCallback(({ longitude, latitude }) => {
-    console.log("lon:", longitude);
-    console.log("lat:", latitude);
-    mapRef.current?.flyTo({
-      center: [longitude, latitude],
-      zoom: 2.4,
-      speed: 0.2,
-      curve: 1.3,
-      easing(t) {
-        return t;
+  const onCountryChange = useCallback((center) => {
+    mapRef.current?.flyTo(flyToNextCountry(center));
+  }, []);
+  const [mapOptions, setMapOptions] = useState(MAP_OPTIONS);
+
+  const onViewPortChange = (viewport) => {
+    setMapOptions({
+      ...mapOptions,
+      initialViewState: {
+        ...mapOptions.initialViewState,
+        ...viewport,
       },
     });
-  }, []);
-  const [mapOptions, setMapOptions] = useState({
-    initialViewState: center,
-    style: {
-      width: "100vw",
-      height: "100vh",
-    },
-    mapStyle: "mapbox://styles/byessilyurt/cl5r6psud000015pgqokz266x",
-    projection: "globe",
-  });
+  };
 
   useEffect(() => {
-    onCountryChange({ longitude: center[1], latitude: center[0] });
-    console.log("center: ", center[0]);
+    onCountryChange(center);
   }, [center, onCountryChange]);
-
-  useEffect(() => {
-    console.log(showPopup);
-  }, [showPopup]);
-
-  const mapOnLoad = useCallback(
-    (e) => {
-      try {
-        console.log("flyto: ", e.target.flyTo);
-        e.target.flyTo({
-          center,
-          zoom: 2,
-          speed: 0.3,
-          curve: 1,
-          easing(t) {
-            return t;
-          },
-        });
-      } catch {
-        console.error("ERROR!: ", center);
-      }
-    },
-    [center]
-  );
 
   return (
     <>
@@ -71,35 +102,10 @@ const MapBox = () => {
         style={mapOptions.style}
         projection={mapOptions.projection}
         mapStyle={mapOptions.mapStyle}
-        onViewPortChange={(viewport) => {
-          setMapOptions({
-            ...mapOptions,
-            initialViewState: {
-              ...mapOptions.initialViewState,
-              ...viewport,
-            },
-          });
-        }}
+        onViewPortChange={onViewPortChange}
       >
-        {marker && (
-          <MapMarker
-            onClick={() => setShowPopup(true)}
-            latitude={center[0]}
-            longitude={center[1]}
-            setMapOptions={setMapOptions}
-          >
-            {marker.country}
-          </MapMarker>
-        )}
-        {showPopup && (
-          <MapPopup
-            latitude={center[0]}
-            longitude={center[1]}
-            setShowPopup={setShowPopup}
-          >
-            "You are here""
-          </MapPopup>
-        )}
+        {marker && mapBoxMarker()}
+        {showPopup && mapBoxPopup()}
       </Map>
     </>
   );

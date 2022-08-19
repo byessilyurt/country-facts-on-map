@@ -9,7 +9,5 @@ export const fetchNews = async (countryCode) => {
     url: `https://api.api-ninjas.com/v1/country?name=${countryCode}`,
   };
 
-  const response = await axios.request(options);
-  console.log(response);
-  return response;
+  return await axios.request(options);
 };
