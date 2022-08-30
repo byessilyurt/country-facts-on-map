@@ -1,7 +1,7 @@
 # Keywords
-MapBox, ReactJS
+MapBox, ReactJS, Axios
 
-##Country Facts On Map
+## Country Facts On Map
 
 * Designed a custom MapBox style on Studio and added it to the application using react-map-gl library. 
 * Sending request to the API with a parameter of country's alpha code.
