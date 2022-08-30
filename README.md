@@ -1,4 +1,7 @@
-Country Facts On Map
+# Keywords
+MapBox, ReactJS
+
+##Country Facts On Map
 
 * Designed a custom MapBox style on Studio and added it to the application using react-map-gl library. 
 * Sending request to the API with a parameter of country's alpha code.
